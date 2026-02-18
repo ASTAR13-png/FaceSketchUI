@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <!-- saved from url=(0063)https://adityasinha-1988.github.io/pblcse/pbl_ppt_template.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PBL Presentation | 2026</title>
     <script src="./PBL Presentation _ 2026_files/saved_resource"></script>
@@ -49,39 +52,26 @@
         
         <section class="text-center">
             <div class="inline-block px-4 py-1 border border-slate-800 rounded-full text-slate-500 text-[10px] font-mono mb-6 uppercase tracking-widest">ID: [YOUR_REG_NO]</div>
-            <h1 class="text-6xl md:text-7xl font-extrabold mb-8 uppercase leading-tight"><span class="gradient-text uppercase">[Project Title Here]</span></h1>
+            <h1 class="text-6xl md:text-7xl font-extrabold mb-8 uppercase leading-tight"><span class="gradient-text uppercase">Face Sketch Builder</span></h1>
             <p class="text-slate-400 max-w-2xl mx-auto italic text-lg leading-relaxed border-l-2 border-blue-500/30 pl-6 text-left">
-                "Hypothesis/Project Statement: Define the core research question or the primary objective of your development project."
+                "An interactive Java Swing application that allows users to assemble facial sketches by selecting and layering head and eye assets."
             </p>
         </section>
 
-        <!-- FaceSketchUI Java Project Context -->
-        <section class="glass p-10 rounded-[2.5rem] mb-12">
-            <h2 class="text-3xl font-extrabold mb-6">Java UI Structure Overview</h2>
-            <ul class="text-left text-lg text-slate-400">
-                <li><b>FaceSketchUI.java</b>: Main entry point. Sets up JFrame, left panel with tool buttons, and a right panel for feature selection.</li>
-                <li><b>HeadPanel.java</b>: Displays selectable head images. Implements <i>HeadSelectListener</i> for head selection events.</li>
-                <li><b>EyePanel.java</b>: Displays selectable eye images. Implements <i>EyeSelectListener</i> for eye selection events.</li>
-                <li>Panels use <b>GridLayout</b> and <b>MouseListener</b> to handle image selection and update the main canvas.</li>
-                <li>Assets are loaded from <b>src/assets</b> folders and scaled for thumbnails.</li>
-                <li>UI is styled with custom colors and layouts for a modern look.</li>
-            </ul>
-            <p class="mt-4 text-sm text-slate-500">See <b>src/FaceSketchUI.java</b>, <b>src/HeadPanel.java</b>, and <b>src/EyePanel.java</b> for full implementation details.</p>
-        </section>
 
         <section id="problem" class="grid md:grid-cols-2 gap-12 items-stretch">
             <div class="glass p-10 rounded-[2.5rem] flex flex-col justify-center border-l-4 border-blue-600">
                 <h2 class="text-3xl font-extrabold mb-6">Problem Statement</h2>
-                <p class="text-slate-400 leading-relaxed text-justify">Describe the specific challenge you are addressing. Why is this project necessary?</p>
+                <p class="text-slate-400 leading-relaxed text-justify">Manual facial sketching demands artistic skill and is slow. Our Java Swing app simplifies the process by letting users quickly compose faces from selectable head and eye assets.</p>
             </div>
             <div class="space-y-6">
                 <div class="glass p-7 rounded-3xl border-r-4 border-blue-500/50">
                     <h3 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-2">Literature Review / Market Research</h3>
-                    <p class="text-sm text-slate-500 italic">Summary of existing solutions or research papers analyzed.</p>
+                    <p class="text-sm text-slate-500 italic">Traditional face‑sketching tools and manual drawing require significant artistic skill and are time‑intensive. Many existing software packages are complex, feature‑heavy graphic editors that overwhelm non‑experts and slow down simple sketch assembly tasks.</p>
                 </div>
                 <div class="glass p-7 rounded-3xl border-r-4 border-purple-500/50">
                     <h3 class="text-purple-400 font-bold text-xs uppercase tracking-widest mb-2">Research Gap / Innovation</h3>
-                    <p class="text-sm text-slate-500 italic">What makes your approach different or better than the State-of-the-Art?</p>
+                    <p class="text-sm text-slate-500 italic">Unlike complex graphic editors or drawing-by-hand, this lightweight Java Swing tool delivers quick facial assembly through selectable assets. It requires no drawing skills, runs as a standalone desktop app, and can be extended with new features (e.g. other facial components or saving/comparing sketches), making it more accessible for students and rapid prototyping scenarios.</p>
                 </div>
             </div>
         </section>
@@ -152,7 +142,7 @@
                 let m = Math.floor(sec / 60);
                 let s = sec % 60;
                 document.getElementById('displayTime').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                
+
                 if (sec >= 480 && sec < 600) { // 8-10 Mins Warning
                     document.getElementById('timerContainer').classList.add('timer-warning');
                     document.getElementById('timerIcon').classList.replace('fa-hourglass-start', 'fa-hourglass-half');
@@ -182,7 +172,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { 
+                scales: {
                     y: { beginAtZero: true, grid: { color: '#ffffff05' }, ticks: { color: '#475569' } },
                     x: { grid: { display: false }, ticks: { color: '#475569' } }
                 }
@@ -190,4 +180,6 @@
         });
     </script>
 
-</body></html>
+    </body>
+
+</html>
