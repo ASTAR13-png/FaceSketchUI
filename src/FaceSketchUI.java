@@ -1,15 +1,25 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 
 public class FaceSketchUI implements
         HeadPanel.HeadSelectListener,
-        EyePanel.EyeSelectListener {
+        EyePanel.EyeSelectListener,
+        EyebrowPanel.EyebrowSelectListener,
+        NosePanel.NoseSelectListener,
+        LipsPanel.LipsSelectListener {
 
-    private JLabel canvasImage;
-    private JLabel eyeImage;
+    private JLabel headLabel, eyeLabel, browLabel, noseLabel, lipsLabel;
+
+    // Default sizes
+    private int headW = 300, headH = 350;
+    private int eyeW = 180, eyeH = 60;
+    private int browW = 200, browH = 50;
+    private int noseW = 80, noseH = 120;
+    private int lipsW = 120, lipsH = 50;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new FaceSketchUI().createUI());
@@ -18,181 +28,213 @@ public class FaceSketchUI implements
     public void createUI() {
 
         JFrame frame = new JFrame("Face Sketch Builder");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1400, 800);
-        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        // ================= LEFT PANEL =================
-        JPanel leftPanel = new JPanel();
-        leftPanel.setPreferredSize(new Dimension(120, 0));
-        leftPanel.setBackground(new Color(10, 53, 88));
-        leftPanel.setLayout(new GridLayout(9, 1, 5, 5));
+        // LEFT PANEL
+        JPanel left = new JPanel(new GridLayout(10, 1));
+        left.setPreferredSize(new Dimension(120, 0));
 
-        String[] tools = {"Head", "Hair", "Eyes", "Eyebrows", "Nose", "Lips", "Mustache", "More"};
+        String[] tools = { "Head", "Eyes", "Eyebrows", "Nose", "Lips" };
 
-        // ================= RIGHT PANEL CENTER (Switching Panels) =================
-        JPanel rightPanelCenter = new JPanel(new BorderLayout());
+        JPanel rightCenter = new JPanel(new BorderLayout());
 
         HeadPanel headPanel = new HeadPanel(this);
         EyePanel eyePanel = new EyePanel(this);
+        EyebrowPanel browPanel = new EyebrowPanel(this);
+        NosePanel nosePanel = new NosePanel(this);
+        LipsPanel lipsPanel = new LipsPanel(this);
 
-        // Default panel
-        rightPanelCenter.add(headPanel, BorderLayout.CENTER);
+        rightCenter.add(headPanel);
 
-        for (String tool : tools) {
-            JButton btn = new JButton(tool);
-
+        for (String t : tools) {
+            JButton btn = new JButton(t);
             btn.addActionListener(e -> {
-                rightPanelCenter.removeAll();
+                rightCenter.removeAll();
 
-                if (tool.equals("Head")) {
-                    rightPanelCenter.add(headPanel, BorderLayout.CENTER);
-                } else if (tool.equals("Eyes")) {
-                    rightPanelCenter.add(eyePanel, BorderLayout.CENTER);
+                switch (t) {
+                    case "Head":
+                        rightCenter.add(headPanel);
+                        break;
+                    case "Eyes":
+                        rightCenter.add(eyePanel);
+                        break;
+                    case "Eyebrows":
+                        rightCenter.add(browPanel);
+                        break;
+                    case "Nose":
+                        rightCenter.add(nosePanel);
+                        break;
+                    case "Lips":
+                        rightCenter.add(lipsPanel);
+                        break;
                 }
 
-                rightPanelCenter.revalidate();
-                rightPanelCenter.repaint();
+                rightCenter.revalidate();
+                rightCenter.repaint();
             });
-
-            leftPanel.add(btn);
+            left.add(btn);
         }
 
-        // ================= CENTER CANVAS =================
-       JLayeredPane canvas = new JLayeredPane();
-canvas.setPreferredSize(new Dimension(800, 700));
-canvas.setBackground(Color.WHITE);
-canvas.setOpaque(true);
+        // ================= CANVAS =================
+        JLayeredPane canvas = new JLayeredPane();
+        canvas.setPreferredSize(new Dimension(800, 700));
 
+        // LAYERS (IMPORTANT)
+        headLabel = new JLabel(); // bottom
+        lipsLabel = new JLabel();
+        noseLabel = new JLabel();
+        eyeLabel = new JLabel();
+        browLabel = new JLabel(); // top
 
-        canvasImage = new JLabel();
-canvasImage.setBounds(400, 150, 300, 350);
-canvas.add(canvasImage, Integer.valueOf(1)); // Layer 1
+        // ADD IN CORRECT ORDER
+        canvas.add(headLabel, Integer.valueOf(1));
+        canvas.add(lipsLabel, Integer.valueOf(2));
+        canvas.add(noseLabel, Integer.valueOf(3));
+        canvas.add(eyeLabel, Integer.valueOf(4));
+        canvas.add(browLabel, Integer.valueOf(5));
 
-eyeImage = new JLabel();
-canvas.add(eyeImage, Integer.valueOf(2));    // Layer 2 (above head)
+        headLabel.setBounds(400, 150, headW, headH);
 
+        // DRAG + RESIZE
+        enableInteraction(eyeLabel);
+        enableInteraction(browLabel);
+        enableInteraction(noseLabel);
+        enableInteraction(lipsLabel);
 
-        // ================= RIGHT PANEL =================
-        JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setPreferredSize(new Dimension(350, 0));
-        rightPanel.setBackground(new Color(10, 53, 88));
+        // RIGHT PANEL
+        JPanel right = new JPanel(new BorderLayout());
 
-        JPanel topButtons = new JPanel();
-        topButtons.setBackground(new Color(10, 53, 88));
-        topButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        JButton save = new JButton("SAVE");
+        JButton reset = new JButton("RESET");
 
-        JButton saveBtn = new JButton("SAVE");
-        JButton resetBtn = new JButton("RESET");
-        JButton compareBtn = new JButton("COMPARE");
-        JButton deleteBtn = new JButton("DELETE");
+        JPanel top = new JPanel();
+        top.add(save);
+        top.add(reset);
 
-        topButtons.add(saveBtn);
-        topButtons.add(resetBtn);
-        topButtons.add(deleteBtn);
-        topButtons.add(compareBtn);
-
-        // Reset button
-        resetBtn.addActionListener(e -> {
-            canvasImage.setIcon(null);
-            eyeImage.setIcon(null);
+        reset.addActionListener(e -> {
+            headLabel.setIcon(null);
+            eyeLabel.setIcon(null);
+            browLabel.setIcon(null);
+            noseLabel.setIcon(null);
+            lipsLabel.setIcon(null);
         });
 
-        // Delete button
-        deleteBtn.addActionListener(e -> {
-            canvasImage.setIcon(null);
-            eyeImage.setIcon(null);
-        });
+        save.addActionListener(e -> saveCanvas(canvas));
 
-        // Save button
-        saveBtn.addActionListener(e -> saveCanvas(canvas));
+        right.add(top, BorderLayout.NORTH);
+        right.add(rightCenter, BorderLayout.CENTER);
 
-        // Compare placeholder
-        compareBtn.addActionListener(e ->
-                JOptionPane.showMessageDialog(null, "Compare function coming soon!")
-        );
-
-        rightPanel.add(topButtons, BorderLayout.NORTH);
-        rightPanel.add(rightPanelCenter, BorderLayout.CENTER);
-
-        // ================= ADD TO FRAME =================
-        frame.add(leftPanel, BorderLayout.WEST);
+        frame.add(left, BorderLayout.WEST);
         frame.add(canvas, BorderLayout.CENTER);
-        frame.add(rightPanel, BorderLayout.EAST);
+        frame.add(right, BorderLayout.EAST);
 
         frame.setVisible(true);
     }
 
-    // ================= HEAD SELECTION =================
-    @Override
-public void onHeadSelected(ImageIcon headIcon) {
+    // ================= DRAG + RESIZE =================
+    private void enableInteraction(JLabel label) {
 
-    Image resized = headIcon.getImage()
-            .getScaledInstance(300, 350, Image.SCALE_SMOOTH);
+        final Point[] offset = new Point[1];
 
-    canvasImage.setIcon(new ImageIcon(resized));
-    canvasImage.setBounds(400, 150, 300, 350);
+        label.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                offset[0] = e.getPoint();
+            }
+        });
 
-    // If eyes already selected, reposition them
-    if (eyeImage.getIcon() != null) {
-        Rectangle headBounds = canvasImage.getBounds();
+        label.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseDragged(MouseEvent e) {
+                int x = label.getX() + e.getX() - offset[0].x;
+                int y = label.getY() + e.getY() - offset[0].y;
+                label.setLocation(x, y);
+            }
+        });
 
-        int eyeX = headBounds.x + 60;
-        int eyeY = headBounds.y + 100;
+        // Scroll to resize
+        label.addMouseWheelListener(e -> {
+            if (label.getIcon() == null)
+                return;
 
-        eyeImage.setBounds(eyeX, eyeY, 180, 60);
+            int w = label.getWidth();
+            int h = label.getHeight();
+
+            if (e.getWheelRotation() < 0) {
+                w += 10;
+                h += 5;
+            } else {
+                w -= 10;
+                h -= 5;
+            }
+
+            if (w < 30 || h < 20)
+                return;
+
+            ImageIcon icon = (ImageIcon) label.getIcon();
+            Image img = icon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+            label.setIcon(new ImageIcon(img));
+            label.setSize(w, h);
+        });
     }
-}
 
-
-    // ================= EYE SELECTION =================
-@Override
-public void onEyeSelected(ImageIcon eyeIcon) {
-
-    if (canvasImage.getIcon() == null) {
-        JOptionPane.showMessageDialog(null, "Select a head first!");
-        return;
+    // ================= FEATURE METHODS =================
+    public void onHeadSelected(ImageIcon icon) {
+        Image img = icon.getImage().getScaledInstance(headW, headH, Image.SCALE_SMOOTH);
+        headLabel.setIcon(new ImageIcon(img));
+        updatePositions();
     }
 
-    Image resized = eyeIcon.getImage()
-            .getScaledInstance(240, 90, Image.SCALE_SMOOTH);
+    public void onEyeSelected(ImageIcon icon) {
+        eyeLabel.setIcon(new ImageIcon(icon.getImage().getScaledInstance(eyeW, eyeH, Image.SCALE_SMOOTH)));
+        updatePositions();
+    }
 
-    eyeImage.setIcon(new ImageIcon(resized));
+    public void onEyebrowSelected(ImageIcon icon) {
+        browLabel.setIcon(new ImageIcon(icon.getImage().getScaledInstance(browW, browH, Image.SCALE_SMOOTH)));
+        updatePositions();
+    }
 
-    Rectangle headBounds = canvasImage.getBounds();
+    public void onNoseSelected(ImageIcon icon) {
+        noseLabel.setIcon(new ImageIcon(icon.getImage().getScaledInstance(noseW, noseH, Image.SCALE_SMOOTH)));
+        updatePositions();
+    }
 
-    int eyeX = headBounds.x + 35;
-    int eyeY = headBounds.y + 90;
+    public void onLipsSelected(ImageIcon icon) {
+        lipsLabel.setIcon(new ImageIcon(icon.getImage().getScaledInstance(lipsW, lipsH, Image.SCALE_SMOOTH)));
+        updatePositions();
+    }
 
-    eyeImage.setBounds(eyeX, eyeY, 240, 90);
-}
+    // ================= AUTO ALIGN =================
+    private void updatePositions() {
 
-    // ================= SAVE CANVAS =================
+        Rectangle head = headLabel.getBounds();
+        int cx = head.x + head.width / 2;
+
+        eyeLabel.setBounds(cx - eyeW / 2, head.y + (int) (head.height * 0.35), eyeW, eyeH);
+        browLabel.setBounds(cx - browW / 2, head.y + (int) (head.height * 0.25), browW, browH);
+        noseLabel.setBounds(cx - noseW / 2, head.y + (int) (head.height * 0.45), noseW, noseH);
+        lipsLabel.setBounds(cx - lipsW / 2, head.y + (int) (head.height * 0.65), lipsW, lipsH);
+    }
+
+    // ================= SAVE =================
     private void saveCanvas(JComponent canvas) {
 
-    BufferedImage img = new BufferedImage(
-            canvas.getWidth(),
-            canvas.getHeight(),
-            BufferedImage.TYPE_INT_RGB
-    );
+        BufferedImage img = new BufferedImage(
+                canvas.getWidth(),
+                canvas.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
 
-    Graphics2D g2 = img.createGraphics();
-    canvas.paint(g2);
-    g2.dispose();
+        Graphics2D g2 = img.createGraphics();
+        canvas.paint(g2);
+        g2.dispose();
 
-    try {
-        File dir = new File("saved");
-        if (!dir.exists()) dir.mkdir();
-
-        File out = new File(dir,
-                "sketch_" + System.currentTimeMillis() + ".png");
-
-        ImageIO.write(img, "png", out);
-        JOptionPane.showMessageDialog(null, "Saved Successfully!");
-    } catch (Exception ex) {
-        ex.printStackTrace();
+        try {
+            File out = new File("sketch.png");
+            ImageIO.write(img, "png", out);
+            JOptionPane.showMessageDialog(null, "Saved!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
-
-        }
